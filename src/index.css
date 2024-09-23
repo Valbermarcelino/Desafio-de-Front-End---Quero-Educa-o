@@ -1,0 +1,11 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:focus {
+  @apply ring-2 ring-primary-pure/80 ring-offset-2 ring-offset-white/80 outline-0 transition;
+}
+
+:focus:hover {
+  @apply ring-offset-4
+}
