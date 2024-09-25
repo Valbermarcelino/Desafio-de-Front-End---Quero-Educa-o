@@ -29,24 +29,29 @@ const QCardOffer: FC<QCardOfferProps> = ({
   iesName,
 }) => {
   return (
-    <article className="bg-white p-6 rounded-lg shadow-sm border flex flex-col justify-between items-start gap-3">
+    <article className="bg-white p-6 rounded-lg shadow-sm border flex flex-col justify-between gap-3 h-full">
       <img src={iesLogo} alt={iesName} className="h-10 object-contain" />
-      <QHeading tag="h2" size="sm">
+      
+      <QHeading tag="h2" size="sm" minHeight="48px" lines={2}>
         {courseName}
       </QHeading>
+
       <QRating rating={rating} />
+      
       <QPrice
         fullPrice={fullPrice}
         offeredPrice={offeredPrice}
         discount={discount}
       />
+      
       <div>
         <QText tag="p">{kind}</QText>
         <QText tag="p" color="minor" size="sm">
           {level}
         </QText>
       </div>
-      <QButton tag="a" size="sm" className="w-full">
+      
+      <QButton tag="a" size="sm" className="w-full mt-auto">
         Quero esta bolsa
       </QButton>
     </article>
