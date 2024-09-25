@@ -64,7 +64,7 @@ const App: React.FC = () => {
   }, []);
 
   // Função para aplicar filtros e ordenação
-  useEffect(() => {
+  const applyFiltersAndSort = () => {
     const filtered = offers.filter((offer) => {
       const matchesLevel = filters.level.length === 0 || filters.level.includes(offer.level);
       const matchesKind = filters.kind.length === 0 || filters.kind.includes(offer.kind);
@@ -89,11 +89,16 @@ const App: React.FC = () => {
     });
 
     setFilteredOffers(sortedOffers); // Define as ofertas filtradas
-  }, [filters, sortCriteria, offers, searchTerm]); // Filtros, ordenação e busca são aplicados sempre que esses valores mudam
+  };
 
   const handleSearch = () => {
-    setSearchTerm((prev) => prev); // Apenas para ativar o useEffect
+    applyFiltersAndSort(); // Chama a função de filtragem ao pressionar o botão
   };
+
+  // useEffect para aplicar filtros e ordenação sempre que sortCriteria ou filters mudarem
+  useEffect(() => {
+    applyFiltersAndSort();
+  }, [sortCriteria, filters]); // Executa sempre que sortCriteria ou filters mudarem
 
   return (
     <QLayout
