@@ -19,7 +19,7 @@ const App: React.FC = () => {
   const [filters, setFilters] = useState({
     level: [],
     kind: [],
-    priceRange: [0, 10000], // Faixa de preço inicial
+    priceRange: [0, 700], // Faixa de preço inicial
   });
 
   useEffect(() => {
@@ -39,9 +39,7 @@ const App: React.FC = () => {
     const filtered = offers.filter((offer) => {
       const matchesLevel = filters.level.length === 0 || filters.level.includes(offer.level);
       const matchesKind = filters.kind.length === 0 || filters.kind.includes(offer.kind);
-      const matchesPriceRange =
-        offer.offeredPrice >= filters.priceRange[0] &&
-        offer.offeredPrice <= filters.priceRange[1];
+      const matchesPriceRange = offer.offeredPrice <= filters.priceRange[1];
       const matchesSearch = offer.courseName.toLowerCase().includes(searchTerm.toLowerCase());
 
       return matchesLevel && matchesKind && matchesPriceRange && matchesSearch;
