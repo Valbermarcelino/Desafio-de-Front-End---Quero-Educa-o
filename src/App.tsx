@@ -13,40 +13,28 @@ import QSectionForm from "./components/QSectionForm";
 
 const App: React.FC = () => {
   const [offers, setOffers] = useState([]);
-  const [filteredOffers, setFilteredOffers] = useState([]); // Ofertas filtradas
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState(''); // Termo de busca
-  const [sortCriteria, setSortCriteria] = useState<string>('name'); // Critério de ordenação
-
-  // Estado dos filtros
+  const [filteredOffers, setFilteredOffers] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortCriteria, setSortCriteria] = useState("name");
   const [filters, setFilters] = useState({
     level: [],
     kind: [],
-    priceRange: [0, 10000],
+    priceRange: [0, 10000], // Faixa de preço inicial
   });
 
   useEffect(() => {
-    // Realiza a requisição para a API de ofertas
-    fetch("http://localhost:3000/offers")
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Erro ao buscar as ofertas");
-        }
-        return response.json();
-      })
-      .then((data) => {
-        setOffers(data); // Define as ofertas recebidas no estado original
-        setFilteredOffers(data); // Inicialmente, as ofertas filtradas são todas
-        setLoading(false);
-      })
-      .catch((error) => {
-        setError(error.message); // Define a mensagem de erro
-        setLoading(false);
-      });
-  }, []); // O array vazio faz com que o useEffect rode apenas quando o componente for montado
+    // Simulação de fetch de ofertas
+    const fetchOffers = async () => {
+      const response = await fetch("http://localhost:3000/offers");
+      const data = await response.json();
+      setOffers(data);
+      setFilteredOffers(data); // Inicialmente, todas as ofertas são filtradas
+    };
 
-  // Função para aplicar filtros
+    fetchOffers();
+  }, []);
+
+  // Função para aplicar filtros e ordenação
   useEffect(() => {
     const filtered = offers.filter((offer) => {
       const matchesLevel = filters.level.length === 0 || filters.level.includes(offer.level);
@@ -54,7 +42,9 @@ const App: React.FC = () => {
       const matchesPriceRange =
         offer.offeredPrice >= filters.priceRange[0] &&
         offer.offeredPrice <= filters.priceRange[1];
-      return matchesLevel && matchesKind && matchesPriceRange;
+      const matchesSearch = offer.courseName.toLowerCase().includes(searchTerm.toLowerCase());
+
+      return matchesLevel && matchesKind && matchesPriceRange && matchesSearch;
     });
 
     // Aplica a ordenação após o filtro
@@ -72,29 +62,12 @@ const App: React.FC = () => {
     });
 
     setFilteredOffers(sortedOffers); // Define as ofertas filtradas
-  }, [filters, sortCriteria, offers]); // Filtros e ordenação são aplicados sempre que esses valores mudam
+  }, [filters, sortCriteria, offers, searchTerm]); // Filtros, ordenação e busca são aplicados sempre que esses valores mudam
 
-  // Função para realizar a busca local
   const handleSearch = () => {
-    const search = searchTerm.toLowerCase(); // Busca case-insensitive
-    const filtered = offers.filter((offer) =>
-      offer.courseName.toLowerCase().includes(search)
-    );
-    setFilteredOffers(filtered); // Atualiza as ofertas filtradas
+    // Busca não requer alteração no estado, pois é filtrada diretamente no useEffect
+    setSearchTerm((prev) => prev); // Apenas para ativar o useEffect
   };
-
-  // Função para lidar com a alteração do critério de ordenação
-  const handleSortChange = (value: string) => {
-    setSortCriteria(value); // Atualiza o critério de ordenação
-  };
-
-  if (loading) {
-    return <p>Carregando ofertas...</p>;
-  }
-
-  if (error) {
-    return <p>Erro: {error}</p>;
-  }
 
   return (
     <QLayout
@@ -104,20 +77,14 @@ const App: React.FC = () => {
             type="search"
             id="site-search"
             name="q"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Busque o curso ideal para você"
             aria-label="Buscar cursos e bolsas"
+            onChange={(e) => setSearchTerm(e.target.value)}
           />
           <QButton type="button" onClick={handleSearch}>Buscar</QButton>
         </QHeader>
       }
-      sidebar={
-        <QFormFilterOffer
-          filters={filters} // Passa os filtros atuais
-          onChange={setFilters} // Atualiza os filtros
-        />
-      }
+      sidebar={<QFormFilterOffer filters={filters} onChange={setFilters} />}
       footer={<QFooter />}
     >
       <QSectionForm
@@ -125,7 +92,7 @@ const App: React.FC = () => {
         orderBy={
           <QFormOrderByOffer
             sortCriteria={sortCriteria}
-            onChange={handleSortChange}
+            onChange={setSortCriteria}
           />
         }
         filter={<QFormFilterOffer />}
@@ -138,13 +105,19 @@ const App: React.FC = () => {
               key={card.id}
               courseName={card.courseName}
               rating={card.rating}
-              fullPrice={`R$ ${card.fullPrice.toFixed(2)}`}
-              offeredPrice={`R$ ${card.offeredPrice.toFixed(2)}`}
-              discount={`${((1 - card.offeredPrice / card.fullPrice) * 100).toFixed(0)}% 📉`}
-              kind={card.kind}
-              level={card.level}
+              fullPrice={`R$ ${card.fullPrice.toFixed(2).replace('.', ',')}`} // Formatação de moeda
+              offeredPrice={`R$ ${card.offeredPrice.toFixed(2).replace('.', ',')}`} // Formatação de moeda
+              discount={`${Math.round(((card.fullPrice - card.offeredPrice) / card.fullPrice) * 100)}%`} // Cálculo de desconto
+              kind={card.kind === 'presencial' ? 'Presencial 🏫' : 'EaD 🏠'} // Tipo do curso
+              level={
+                card.level === 'bacharelado' ? 'Graduação (bacharelado) 🎓' :
+                card.level === 'tecnologo' ? 'Graduação (tecnólogo) 🎓' :
+                card.level === 'licenciatura' ? 'Graduação (licenciatura) 🎓' :
+                'Nível desconhecido'
+              }
               iesLogo={card.iesLogo}
               iesName={card.iesName}
+              ratingStars={Array(Math.floor(card.rating)).fill('⭐').concat(card.rating % 1 >= 0.5 ? '🌟' : []).join('')} // Exibe estrelas
             />
           )}
         </QListCard>
