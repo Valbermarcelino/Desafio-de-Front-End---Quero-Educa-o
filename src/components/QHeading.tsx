@@ -14,7 +14,6 @@ const QHeading: FC<QHeadingProps> = ({
   size = "md",
   tag: TagName,
   lines = 2, // Limita a 2 linhas por padrão
-  minHeight = "48px", // Altura mínima padrão
   ...rest
 }) => {
   return (
@@ -28,7 +27,6 @@ const QHeading: FC<QHeadingProps> = ({
           lg: "text-4xl",
         }[size],
         `line-clamp-${lines}`, // Limita o número de linhas do título
-        `min-h-[${minHeight}]` // Garante altura mínima para o título
       )}
     >
       {children}
