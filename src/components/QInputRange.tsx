@@ -22,17 +22,6 @@ const QInputRange: FC<QInputRangeProps> = ({ label, min, max, value, onChange })
 
   return (
     <>
-      <QText tag="label" weight="light">
-        {label}
-      </QText>
-      <input
-        type="range"
-        min={min}
-        max={max}
-        value={value[0]}
-        className="w-full mt-3 cursor-col-resize"
-        onChange={handleMinChange} // Atualiza o valor mínimo
-      />
       <input
         type="range"
         min={min}

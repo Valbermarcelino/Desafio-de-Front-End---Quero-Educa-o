@@ -78,9 +78,9 @@ const QFormFilterOffer: FC<QFormFilterOfferProps> = ({ filters, onChange }) => {
 
       <QFieldset legend="Preço da mensalidade">
         <QInputRange
-          label={`R$ ${filters.priceRange[0]} - R$ ${filters.priceRange[1]}`}
+          label={`R$ 0 - R$ ${filters.priceRange[1]}`}
           min={0}
-          max={10000}
+          max={700}
           value={filters.priceRange}
           onChange={handlePriceRangeChange}
         />
