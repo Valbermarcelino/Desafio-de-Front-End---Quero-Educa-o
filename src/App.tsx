@@ -11,60 +11,6 @@ import QFormOrderByOffer from "./components/QFormOrderByOffer";
 import QFormFilterOffer from "./components/QFormFilterOffer";
 import QSectionForm from "./components/QSectionForm";
 
-// Função para formatar valores em moeda
-const formatCurrency = (value: number) => {
-  return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-};
-
-// Função para calcular a porcentagem de desconto
-const calculateDiscount = (fullPrice: number, offeredPrice: number) => {
-  return ((1 - offeredPrice / fullPrice) * 100).toFixed(0); // Calcula a porcentagem de desconto
-};
-
-// Função para renderizar estrelas
-const renderStars = (rating: number) => {
-  const fullStars = Math.floor(rating); // Estrelas completas
-  const hasHalfStar = rating % 1 !== 0; // Verifica se há meia estrela
-
-  const stars = [];
-
-  for (let i = 0; i < fullStars; i++) {
-    stars.push(<span key={i}>🌟</span>);
-  }
-
-  if (hasHalfStar) {
-    stars.push(<span key="half">⭐️</span>); // Meia estrela
-  }
-
-  return stars;
-};
-
-// Função para traduzir o tipo
-const translateKind = (kind: string) => {
-  switch (kind) {
-    case 'presencial':
-      return 'Presencial 🏫';
-    case 'ead':
-      return 'EaD 🏠';
-    default:
-      return kind;
-  }
-};
-
-// Função para traduzir o nível
-const translateLevel = (level: string) => {
-  switch (level) {
-    case 'bacharelado':
-      return 'Graduação (bacharelado) 🎓';
-    case 'tecnologo':
-      return 'Graduação (tecnólogo) 🎓';
-    case 'licenciatura':
-      return 'Graduação (licenciatura) 🎓';
-    default:
-      return level;
-  }
-};
-
 const App: React.FC = () => {
   const [offers, setOffers] = useState([]);
   const [filteredOffers, setFilteredOffers] = useState([]); // Ofertas filtradas
@@ -72,6 +18,13 @@ const App: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState(''); // Termo de busca
   const [sortCriteria, setSortCriteria] = useState<string>('name'); // Critério de ordenação
+
+  // Estado dos filtros
+  const [filters, setFilters] = useState({
+    level: [],
+    kind: [],
+    priceRange: [0, 10000],
+  });
 
   useEffect(() => {
     // Realiza a requisição para a API de ofertas
@@ -93,6 +46,34 @@ const App: React.FC = () => {
       });
   }, []); // O array vazio faz com que o useEffect rode apenas quando o componente for montado
 
+  // Função para aplicar filtros
+  useEffect(() => {
+    const filtered = offers.filter((offer) => {
+      const matchesLevel = filters.level.length === 0 || filters.level.includes(offer.level);
+      const matchesKind = filters.kind.length === 0 || filters.kind.includes(offer.kind);
+      const matchesPriceRange =
+        offer.offeredPrice >= filters.priceRange[0] &&
+        offer.offeredPrice <= filters.priceRange[1];
+      return matchesLevel && matchesKind && matchesPriceRange;
+    });
+
+    // Aplica a ordenação após o filtro
+    const sortedOffers = [...filtered].sort((a, b) => {
+      switch (sortCriteria) {
+        case 'name':
+          return a.courseName.localeCompare(b.courseName);
+        case 'price':
+          return a.offeredPrice - b.offeredPrice;
+        case 'rating':
+          return b.rating - a.rating;
+        default:
+          return 0;
+      }
+    });
+
+    setFilteredOffers(sortedOffers); // Define as ofertas filtradas
+  }, [filters, sortCriteria, offers]); // Filtros e ordenação são aplicados sempre que esses valores mudam
+
   // Função para realizar a busca local
   const handleSearch = () => {
     const search = searchTerm.toLowerCase(); // Busca case-insensitive
@@ -101,26 +82,6 @@ const App: React.FC = () => {
     );
     setFilteredOffers(filtered); // Atualiza as ofertas filtradas
   };
-
-  // Ordena as ofertas com base no critério de ordenação
-  useEffect(() => {
-    const sortedOffers = [...filteredOffers]; // Copia o array para ordenar
-
-    sortedOffers.sort((a, b) => {
-      switch (sortCriteria) {
-        case 'name':
-          return a.courseName.localeCompare(b.courseName); // Ordena por nome
-        case 'price':
-          return a.offeredPrice - b.offeredPrice; // Ordena por preço (oferta)
-        case 'rating':
-          return b.rating - a.rating; // Ordena por rating (descendente)
-        default:
-          return 0;
-      }
-    });
-
-    setFilteredOffers(sortedOffers); // Atualiza as ofertas ordenadas
-  }, [sortCriteria, filteredOffers]); // Ordena sempre que o critério ou a lista de ofertas filtradas mudar
 
   // Função para lidar com a alteração do critério de ordenação
   const handleSortChange = (value: string) => {
@@ -143,23 +104,28 @@ const App: React.FC = () => {
             type="search"
             id="site-search"
             name="q"
-            value={searchTerm} // Vincula o valor do input ao estado
-            onChange={(e) => setSearchTerm(e.target.value)} // Atualiza o estado com o valor do input
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Busque o curso ideal para você"
             aria-label="Buscar cursos e bolsas"
           />
           <QButton type="button" onClick={handleSearch}>Buscar</QButton>
         </QHeader>
       }
-      sidebar={<QFormFilterOffer />}
+      sidebar={
+        <QFormFilterOffer
+          filters={filters} // Passa os filtros atuais
+          onChange={setFilters} // Atualiza os filtros
+        />
+      }
       footer={<QFooter />}
     >
       <QSectionForm
         title="Veja as opções que encontramos"
         orderBy={
           <QFormOrderByOffer
-            sortCriteria={sortCriteria} // Passa o critério atual
-            onChange={handleSortChange} // Passa a função de alteração
+            sortCriteria={sortCriteria}
+            onChange={handleSortChange}
           />
         }
         filter={<QFormFilterOffer />}
@@ -171,12 +137,12 @@ const App: React.FC = () => {
             <QCardOffer
               key={card.id}
               courseName={card.courseName}
-              rating={renderStars(card.rating)}
-              fullPrice={formatCurrency(card.fullPrice)}
-              offeredPrice={formatCurrency(card.offeredPrice)}
-              discount={`${calculateDiscount(card.fullPrice, card.offeredPrice)}% 📉`}
-              kind={translateKind(card.kind)}
-              level={translateLevel(card.level)}
+              rating={card.rating}
+              fullPrice={`R$ ${card.fullPrice.toFixed(2)}`}
+              offeredPrice={`R$ ${card.offeredPrice.toFixed(2)}`}
+              discount={`${((1 - card.offeredPrice / card.fullPrice) * 100).toFixed(0)}% 📉`}
+              kind={card.kind}
+              level={card.level}
               iesLogo={card.iesLogo}
               iesName={card.iesName}
             />
