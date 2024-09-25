@@ -10,6 +10,23 @@ import QListCard from "./components/QListCard";
 import QFormOrderByOffer from "./components/QFormOrderByOffer";
 import QFormFilterOffer from "./components/QFormFilterOffer";
 import QSectionForm from "./components/QSectionForm";
+import QIconStar from "./components/QIconStar";
+
+// Função para renderizar estrelas
+const renderStars = (rating: number) => {
+  const fullStars = Math.floor(rating); // Estrelas completas
+  const hasHalfStar = rating % 1 !== 0; // Verifica se há meia estrela
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'center' }}>
+      {Array.from({ length: fullStars }, (_, index) => (
+        <QIconStar key={index} />
+      ))}
+      {hasHalfStar && <QIconStar half />}
+    </div>
+  );
+};
+
 
 const App: React.FC = () => {
   const [offers, setOffers] = useState([]);
@@ -102,20 +119,19 @@ const App: React.FC = () => {
             <QCardOffer
               key={card.id}
               courseName={card.courseName}
-              rating={card.rating}
+              rating={renderStars(card.rating)} // Exibe estrelas
               fullPrice={`R$ ${card.fullPrice.toFixed(2).replace('.', ',')}`} // Formatação de moeda
               offeredPrice={`R$ ${card.offeredPrice.toFixed(2).replace('.', ',')}`} // Formatação de moeda
               discount={`${Math.round(((card.fullPrice - card.offeredPrice) / card.fullPrice) * 100)}%`} // Cálculo de desconto
-              kind={card.kind === 'presencial' ? 'Presencial 🏫' : 'EaD 🏠'} // Tipo do curso
+              kind={card.kind === 'presencial' ? 'Presencial' : 'EaD'} // Tipo do curso
               level={
-                card.level === 'bacharelado' ? 'Graduação (bacharelado) 🎓' :
-                card.level === 'tecnologo' ? 'Graduação (tecnólogo) 🎓' :
-                card.level === 'licenciatura' ? 'Graduação (licenciatura) 🎓' :
+                card.level === 'bacharelado' ? 'Graduação (bacharelado)' :
+                card.level === 'tecnologo' ? 'Graduação (tecnólogo)' :
+                card.level === 'licenciatura' ? 'Graduação (licenciatura)' :
                 'Nível desconhecido'
               }
               iesLogo={card.iesLogo}
               iesName={card.iesName}
-              ratingStars={Array(Math.floor(card.rating)).fill('⭐').concat(card.rating % 1 >= 0.5 ? '🌟' : []).join('')} // Exibe estrelas
             />
           )}
         </QListCard>
