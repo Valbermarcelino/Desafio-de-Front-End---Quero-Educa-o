@@ -67,10 +67,11 @@ const translateLevel = (level: string) => {
 
 const App: React.FC = () => {
   const [offers, setOffers] = useState([]);
-  const [filteredOffers, setFilteredOffers] = useState([]); // Para armazenar as ofertas filtradas
+  const [filteredOffers, setFilteredOffers] = useState([]); // Ofertas filtradas
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState(''); // Estado para armazenar o termo de busca
+  const [searchTerm, setSearchTerm] = useState(''); // Termo de busca
+  const [sortCriteria, setSortCriteria] = useState<string>('name'); // Critério de ordenação
 
   useEffect(() => {
     // Realiza a requisição para a API de ofertas
@@ -92,13 +93,38 @@ const App: React.FC = () => {
       });
   }, []); // O array vazio faz com que o useEffect rode apenas quando o componente for montado
 
-  // Função que será chamada ao pressionar o botão de busca
+  // Função para realizar a busca local
   const handleSearch = () => {
     const search = searchTerm.toLowerCase(); // Busca case-insensitive
     const filtered = offers.filter((offer) =>
       offer.courseName.toLowerCase().includes(search)
     );
     setFilteredOffers(filtered); // Atualiza as ofertas filtradas
+  };
+
+  // Ordena as ofertas com base no critério de ordenação
+  useEffect(() => {
+    const sortedOffers = [...filteredOffers]; // Copia o array para ordenar
+
+    sortedOffers.sort((a, b) => {
+      switch (sortCriteria) {
+        case 'name':
+          return a.courseName.localeCompare(b.courseName); // Ordena por nome
+        case 'price':
+          return a.offeredPrice - b.offeredPrice; // Ordena por preço (oferta)
+        case 'rating':
+          return b.rating - a.rating; // Ordena por rating (descendente)
+        default:
+          return 0;
+      }
+    });
+
+    setFilteredOffers(sortedOffers); // Atualiza as ofertas ordenadas
+  }, [sortCriteria, filteredOffers]); // Ordena sempre que o critério ou a lista de ofertas filtradas mudar
+
+  // Função para lidar com a alteração do critério de ordenação
+  const handleSortChange = (value: string) => {
+    setSortCriteria(value); // Atualiza o critério de ordenação
   };
 
   if (loading) {
@@ -130,7 +156,12 @@ const App: React.FC = () => {
     >
       <QSectionForm
         title="Veja as opções que encontramos"
-        orderBy={<QFormOrderByOffer />}
+        orderBy={
+          <QFormOrderByOffer
+            sortCriteria={sortCriteria} // Passa o critério atual
+            onChange={handleSortChange} // Passa a função de alteração
+          />
+        }
         filter={<QFormFilterOffer />}
       />
 
