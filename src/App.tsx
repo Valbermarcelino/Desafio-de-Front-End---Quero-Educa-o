@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import QHeader from "./components/QHeader";
 import QInput from "./components/QInput";
@@ -12,8 +12,37 @@ import QFormFilterOffer from "./components/QFormFilterOffer";
 import QSectionForm from "./components/QSectionForm";
 
 const App: React.FC = () => {
-  const [offers] = useState([]);
-  
+  const [offers, setOffers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Realiza a requisição para a API de ofertas
+    fetch("http://localhost:3000/offers")
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Erro ao buscar as ofertas");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        setOffers(data); // Define as ofertas recebidas no estado
+        setLoading(false);
+      })
+      .catch((error) => {
+        setError(error.message); // Define a mensagem de erro
+        setLoading(false);
+      });
+  }, []); // O array vazio faz com que o useEffect rode apenas quando o componente for montado
+
+  if (loading) {
+    return <p>Carregando ofertas...</p>;
+  }
+
+  if (error) {
+    return <p>Erro: {error}</p>;
+  }
+
   return (
     <QLayout
       header={
