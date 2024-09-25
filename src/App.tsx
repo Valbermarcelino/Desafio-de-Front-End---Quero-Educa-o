@@ -67,8 +67,10 @@ const translateLevel = (level: string) => {
 
 const App: React.FC = () => {
   const [offers, setOffers] = useState([]);
+  const [filteredOffers, setFilteredOffers] = useState([]); // Para armazenar as ofertas filtradas
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState(''); // Estado para armazenar o termo de busca
 
   useEffect(() => {
     // Realiza a requisição para a API de ofertas
@@ -80,7 +82,8 @@ const App: React.FC = () => {
         return response.json();
       })
       .then((data) => {
-        setOffers(data); // Define as ofertas recebidas no estado
+        setOffers(data); // Define as ofertas recebidas no estado original
+        setFilteredOffers(data); // Inicialmente, as ofertas filtradas são todas
         setLoading(false);
       })
       .catch((error) => {
@@ -88,6 +91,15 @@ const App: React.FC = () => {
         setLoading(false);
       });
   }, []); // O array vazio faz com que o useEffect rode apenas quando o componente for montado
+
+  // Função que será chamada ao pressionar o botão de busca
+  const handleSearch = () => {
+    const search = searchTerm.toLowerCase(); // Busca case-insensitive
+    const filtered = offers.filter((offer) =>
+      offer.courseName.toLowerCase().includes(search)
+    );
+    setFilteredOffers(filtered); // Atualiza as ofertas filtradas
+  };
 
   if (loading) {
     return <p>Carregando ofertas...</p>;
@@ -105,10 +117,12 @@ const App: React.FC = () => {
             type="search"
             id="site-search"
             name="q"
+            value={searchTerm} // Vincula o valor do input ao estado
+            onChange={(e) => setSearchTerm(e.target.value)} // Atualiza o estado com o valor do input
             placeholder="Busque o curso ideal para você"
             aria-label="Buscar cursos e bolsas"
           />
-          <QButton type="submit">Buscar</QButton>
+          <QButton type="button" onClick={handleSearch}>Buscar</QButton>
         </QHeader>
       }
       sidebar={<QFormFilterOffer />}
@@ -121,7 +135,7 @@ const App: React.FC = () => {
       />
 
       <div className="mt-6">
-        <QListCard cards={offers}>
+        <QListCard cards={filteredOffers}>
           {(card) => (
             <QCardOffer
               key={card.id}
