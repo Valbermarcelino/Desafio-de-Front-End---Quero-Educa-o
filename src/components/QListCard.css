@@ -1,0 +1,43 @@
+.list-card {
+    display: flex;
+    flex-wrap: wrap; /* Permite que os itens se ajustem em várias linhas */
+    margin: -8px; /* Ajusta o espaço negativo para compensar o padding nos itens */
+  }
+  
+  .card-item {
+    padding: 8px; /* Adiciona espaçamento interno */
+    flex: 1 1 calc(20% - 16px); /* Exibe 5 cards por linha por padrão */
+    box-sizing: border-box; /* Para incluir padding e bordas na largura total */
+  }
+  
+  /* Estilos responsivos */
+  @media (max-width: 639px) {
+    .card-item {
+      flex: 1 1 100%; /* 1 card por linha */
+    }
+  }
+  
+  @media (min-width: 640px) and (max-width: 767px) {
+    .card-item {
+      flex: 1 1 calc(50% - 16px); /* 2 cards por linha */
+    }
+  }
+  
+  @media (min-width: 768px) and (max-width: 1023px) {
+    .card-item {
+      flex: 1 1 calc(33.33% - 16px); /* 3 cards por linha */
+    }
+  }
+  
+  @media (min-width: 1024px) and (max-width: 1535px) {
+    .card-item {
+      flex: 1 1 calc(25% - 16px); /* 4 cards por linha */
+    }
+  }
+  
+  @media (min-width: 1536px) {
+    .card-item {
+      flex: 1 1 calc(20% - 16px); /* 5 cards por linha */
+    }
+  }
+  

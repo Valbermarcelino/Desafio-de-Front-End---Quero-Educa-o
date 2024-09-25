@@ -12,8 +12,21 @@ import QFormFilterOffer from "./components/QFormFilterOffer";
 import QSectionForm from "./components/QSectionForm";
 import QIconStar from "./components/QIconStar";
 
+// Definir interface para as ofertas
+interface Offer {
+  id: string;
+  courseName: string;
+  fullPrice: number;
+  offeredPrice: number;
+  rating: number;
+  kind: 'presencial' | 'ead';
+  level: 'bacharelado' | 'tecnologo' | 'licenciatura';
+  iesLogo: string;
+  iesName: string;
+}
+
 // Função para renderizar estrelas
-const renderStars = (rating: number) => {
+const renderStars = (rating: number): JSX.Element => {
   const fullStars = Math.floor(rating); // Estrelas completas
   const hasHalfStar = rating % 1 !== 0; // Verifica se há meia estrela
 
@@ -22,15 +35,14 @@ const renderStars = (rating: number) => {
       {Array.from({ length: fullStars }, (_, index) => (
         <QIconStar key={index} />
       ))}
-      {hasHalfStar && <QIconStar half />}
+      {hasHalfStar && <QIconStar half />} {/* Meia estrela */}
     </div>
   );
 };
 
-
 const App: React.FC = () => {
-  const [offers, setOffers] = useState([]);
-  const [filteredOffers, setFilteredOffers] = useState([]);
+  const [offers, setOffers] = useState<Offer[]>([]);
+  const [filteredOffers, setFilteredOffers] = useState<Offer[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortCriteria, setSortCriteria] = useState("name");
   const [filters, setFilters] = useState({
@@ -80,7 +92,6 @@ const App: React.FC = () => {
   }, [filters, sortCriteria, offers, searchTerm]); // Filtros, ordenação e busca são aplicados sempre que esses valores mudam
 
   const handleSearch = () => {
-    // Busca não requer alteração no estado, pois é filtrada diretamente no useEffect
     setSearchTerm((prev) => prev); // Apenas para ativar o useEffect
   };
 

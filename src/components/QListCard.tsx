@@ -1,4 +1,5 @@
 import { ReactNode, HTMLAttributes } from "react";
+import './QListCard.css';
 
 interface Card extends HTMLAttributes<HTMLElement> {
   id: string;
@@ -15,11 +16,9 @@ const QListCard = <T extends Card>({
   ...rest
 }: QListCardProps<T>) => {
   return (
-    <ul
-      {...rest}
-    >
+    <ul className="list-card" {...rest}>
       {cards.map((card) => (
-        <li key={card.id}>{children(card)}</li>
+        <li className="card-item" key={card.id}>{children(card)}</li>
       ))}
     </ul>
   );
